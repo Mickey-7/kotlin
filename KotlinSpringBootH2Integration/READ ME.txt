@@ -1,0 +1,189 @@
+reference : https://grokonez.com/spring-framework/spring-boot/kotlin-spring-boot/kotlin-integrate-h2-database-spring-jpa-spring-boot-embedded-mode
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+generate spring boot project @ https://start.spring.io/
+    using Kotlin as Language
+    with Spring Web, JPA & H2 as dependencies
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+on application.properties
+
+    spring.datasource.url=jdbc:h2:mem:testdb
+    spring.datasource.username=sa
+    spring.datasource.password=
+    spring.datasource.driverClassName=org.h2.Driver
+    spring.jpa.hibernate.ddl-auto = update
+    spring.jpa.show-sql=true
+
+    spring.h2.console.enabled=true
+    spring.h2.console.path=/h2_console
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+create  model/Customer class
+
+    @Entity
+    @Table(name = "customer")
+    class Customer() {
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        val id : Long = -1
+
+        @Column(name = "firstName")
+        var firstName : String = ""
+
+        @Column(name = "lastName")
+        var  lastName : String = ""
+
+        // manually created
+        constructor( s: String, s1: String) : this() {
+           this.firstName  = s
+           this.lastName = s1
+        }
+
+        // alt + insert
+        override fun toString(): String {
+            return "Customer(id=$id, firstName='$firstName', lastName='$lastName')"
+        }
+
+    }
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+create repository/CustomerRepository interface
+
+    interface CustomerRepository : CrudRepository<Customer, Long> {
+        fun findByLastName(lastName : String) : List<Customer>
+    }
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+create controller/CustomerController class
+
+    @RestController
+    class CustomerController {
+        // invoke repository
+        @Autowired
+        lateinit var repository: CustomerRepository
+
+        @RequestMapping("/save")
+        fun process(): String {
+            repository.save(Customer( "Jack","Smith"))
+            repository.save(Customer( "Adam", "William"))
+            repository.save(Customer( "Kim", "David"))
+            return "Done"
+        }
+
+        @RequestMapping("/findAll")
+        fun findAll():String{
+            var result = ""
+            for (customer in repository.findAll()) {
+                result += "$customer</br>"
+            }
+            return result
+        }
+
+        @RequestMapping("/findById")
+        fun findById(@RequestParam id : Long) : String{
+            return repository.findById(id).toString()
+        }
+
+        @RequestMapping("/findByLastName")
+        fun fetchDataByLastName(@RequestParam lastName : String): String{
+            var result = "";
+            for (customer in repository.findByLastName(lastName)){
+                result += "$customer</br>"
+            }
+            return  result
+        }
+
+    }
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+test the project
+
+    run the project then open web browser and type :
+
+        localhost://8080/h2_console
+
+    where h2_console pertains to spring.h2.console.path then
+    check the configurations if same with application .properties
+
+        spring.datasource.url=jdbc:h2:mem:testdb
+        spring.datasource.username=sa
+        spring.datasource.password=
+        spring.datasource.driverClassName=org.h2.Driver
+        spring.jpa.hibernate.ddl-auto = update
+        spring.jpa.show-sql=true
+
+        spring.h2.console.enabled=true
+        spring.h2.console.path=/h2_console
+
+    then click Test Connection
+
+        if Test successful appeared
+
+    then click Connect
+
+        type SELECT * FROM CUSTOMER on text area available then click RUN
+
+        output :
+        SELECT * FROM CUSTOMER;
+        ID  	FIRST_NAME  	LAST_NAME
+        (no rows, 4 ms)
+
+    open another tab then type :
+
+        localhost://8080/save on url then press enter
+
+        output : Done
+
+    go back to h2_console tab then click RUN again
+
+        output :
+        SELECT * FROM CUSTOMER;
+        ID  	FIRST_NAME  	LAST_NAME
+        1	Jack	Smith
+        2	Adam	William
+        3	Kim	David
+        (3 rows, 2 ms)
+
+    then test other methods on the controller
+    go back to the other tab then type :
+
+         http://localhost:8080/findAll
+
+         output :
+         Customer(id=1, firstName='Jack', lastName='Smith')
+         Customer(id=2, firstName='Adam', lastName='William')
+         Customer(id=3, firstName='Kim', lastName='David')
+
+         http://localhost:8080/findById?id=3
+
+         output :
+         Optional[Customer(id=3, firstName='Kim', lastName='David')]
+
+        http://localhost:8080/findByLastName?lastName=Smith
+
+        output:
+        Customer(id=1, firstName='Jack', lastName='Smith')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
