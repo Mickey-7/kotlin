@@ -1,0 +1,29 @@
+create kotlin project
+    File-> New-> Project-> select Kotlin-> select JVM | IDEA-> specify directory of project-> Finish
+
+directory upon creation
+    .idea
+    out
+    src
+    project_name.iml
+the src is the default source folder - based on its color
+
+right click on src folder then create kotlin class file (.kt)
+    New
+        Kotlin File/Class
+            select File (default option)
+                enter class name
+kotlin file (.kt) will be created
+
+type main then select maina
+    then enter and below code will appear
+        fun main(args : Array<String>) {
+
+        }
+- the entry point to a Kotlin application
+
+type println("Hello Kotlin"); inside the main function
+
+to run :
+    right click on the Main.kt file
+        then select Run MainKt or CTRL+SHIFT+F10

@@ -1,0 +1,27 @@
+create kotlin User class with fields firstName & lastName
+
+right click on src folder then create kotlin class file (.kt)
+    New
+        Kotlin File/Class
+            select Class
+                enter User as class name
+kotlin file (User.kt) will be created with default code below
+    class User {
+    }
+then type the fields below :
+    var firstName : String;
+    var lastName : String;
+underline will appear after so hover then press alt + insert
+    select secondary constructor
+
+
+create kotlin Main File
+
+right click on src folder then create kotlin class file (.kt)
+    New
+        Kotlin File/Class
+            select File (default option)
+                enter class name
+kotlin file (.kt) will be created
+    type main then select maina
+then type the code inside for demonstrating the sort

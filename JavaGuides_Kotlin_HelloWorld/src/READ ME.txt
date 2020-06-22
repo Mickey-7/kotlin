@@ -1,0 +1,56 @@
+create kotlin project
+    File-> New-> Project-> select Kotlin-> select JVM | IDEA-> specify directory of project-> Finish
+
+directory upon creation
+    .idea
+    out
+    src
+    project_name.iml
+the src is the default source folder - based on its color
+
+right click on src folder then create kotlin class file (.kt)
+    New
+        Kotlin File/Class
+            select File (default option)
+                enter class name
+kotlin file (.kt) will be created
+
+type main then select maina
+    then enter and below code will appear
+        fun main(args : Array<String>) {
+
+        }
+- the entry point to a Kotlin application
+
+type println("Hello Kotlin"); inside the main function
+
+to run :
+    right click on the Main.kt file
+        then select Run MainKt or CTRL+SHIFT+F10
+run console output :
+    Hello Kotlin
+
+    Process finished with exit code 0
+
+
+    //Kotlin List stores elements in a specified order and provides indexed access to them.
+    //Indices start from zero – the index of the first element – and go to lastIndex which is the (list.size - 1).
+    //  Key points of List:
+    //      Methods in List interface supports only read-only access to the list;
+    //          read/write access is supported through the MutableList interface.
+    //      Kotlin distinguishes between read-only and mutable lists.
+    //          Read-only lists are created with listOf() method and mutable lists with mutableListOf() method.
+    //      In Kotlin, the default implementation of List is ArrayList
+    //          which you can think of as a resizable array.
+    //      MutableList is a List with list-specific write operations,
+    //          for example, to add or remove an element at a specific position.
+
+
+    fun main(args: Array<String>) {
+
+        //The example creates a new list of words with listOf().
+        // The size of the list is determined with the size attribute.
+        val words = listOf("Ab","cup","dog","spectacles")
+        println("the list contains ${words.size} elements")
+
+    }

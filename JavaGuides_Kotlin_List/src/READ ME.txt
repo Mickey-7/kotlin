@@ -1,0 +1,3 @@
+always create READ ME.txt first before creating Main.kt
+    If not done, sometimes :
+        weird bug where run button will not occur
