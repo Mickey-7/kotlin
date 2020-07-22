@@ -1,0 +1,289 @@
+reference : https://www.callicoder.com/kotlin-spring-boot-mysql-jpa-hibernate-rest-api-tutorial/
+
+------------------------------------------------------------------------------------------------
+
+dependencies : Spring Data JPA, Spring Web & MySQL Driver
+
+------------------------------------------------------------------------------------------------
+
+Configure MySQL
+    We’ll need to configure MySQL database url, username, and
+    password so that Spring Boot can create a Data source.
+
+    Open src/main/resources/application.properties file and add the following properties to it -
+
+    ## Spring DATASOURCE (DataSourceAutoConfiguration & DataSourceProperties)
+    spring.datasource.url = jdbc:mysql://localhost:3306/article
+    spring.datasource.username = root
+    spring.datasource.password = PASSWORD
+    #spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+
+    ## Hibernate Properties
+
+    # The SQL dialect makes Hibernate generate better SQL for the chosen database
+    spring.jpa.properties.hibernate.dialect = org.hibernate.dialect.MySQL5InnoDBDialect
+
+    # Hibernate ddl auto (create, create-drop, validate, update)
+    spring.jpa.hibernate.ddl-auto = update
+
+------------------------------------------------------------------------------------------------
+
+Creating the Domain Model
+    Let’s now create the Article domain entity.
+    Create a new package called model inside com.example.kotlindemo package,
+    and then create a new Kotlin file called Article.kt with the following contents -
+
+        package com.example.kotlin.domain
+
+        import javax.persistence.*
+
+
+        @Entity
+        @Table(name = "article")
+        class Article {
+            @Id
+            @GeneratedValue(strategy = GenerationType.IDENTITY)
+            val id: Long = 0
+            val title: String = ""
+            val content: String = ""
+        }
+
+    The Entity class is so small and concise, right?
+    That’s because A Kotlin class doesn’t need getters and setters like Java.
+    Moreover, I have used a data class here.
+    A data class automatically generates equals(), hashcode(), toString() and copy() methods.
+
+    Note that, I’ve assigned a default value for all the fields in the Article class.
+    This is needed because Hibernate requires an entity to have a no-arg constructor.
+
+    Assigning default values to all the member fields will let
+    hibernate instantiate an Article without passing any argument.
+    It Works because Kotlin supports Default Arguments :).
+
+------------------------------------------------------------------------------------------------
+
+Creating the Repository
+    Let’s now create the repository for accessing the data from the database.
+    First, create a package called repository inside com.example.kotlindemo package,
+    and then create a Kotlin file named ArticleRepository.kt with the following contents -
+
+        package com.example.kotlin.repository
+
+        import com.example.kotlin.domain.Article
+        import org.springframework.data.jpa.repository.JpaRepository
+        import org.springframework.stereotype.Repository
+
+        @Repository
+        interface ArticleRepository : JpaRepository<Article, Long>
+
+    That’s all we need to do here.
+    Since we’ve extended ArticleRepository from JpaRepository interface,
+    all the CRUD methods on Article entity is readily available to us.
+    Spring boot automatically plugs-in a default implementation
+    of JpaRepository called SimpleJpaRepository at runtime.
+
+------------------------------------------------------------------------------------------------
+
+Creating the controller End-points
+    Finally, Let’s create the controller end-points for all the CRUD operations on Article entity.
+
+    First, create a new package called controller inside com.example.kotlindemo package and
+    then create a new kotlin file called ArticleController.kt inside controller package with
+    the following contents -
+
+        package com.example.kotlin.controller
+
+        import com.example.kotlin.domain.Article
+        import com.example.kotlin.repository.ArticleRepository
+        import org.springframework.http.HttpStatus
+        import org.springframework.http.ResponseEntity
+        import org.springframework.web.bind.annotation.*
+
+        @RestController
+        @RequestMapping("/api")
+        class ArticleController(private val articleRepository : ArticleRepository) {
+
+            @GetMapping("/articles")
+            fun getAllArticles(): List<Article> = articleRepository.findAll()
+
+
+            @PostMapping("/articles")
+            fun createNewArticle(@RequestBody article: Article): Article = articleRepository.save(article)
+
+            @GetMapping("/articles/{id}")
+            fun getArticleById(@PathVariable articleId: Long) : ResponseEntity<Article> {
+                return articleRepository.findById(articleId).map {
+                    article -> ResponseEntity.ok(article)
+                }.orElse(ResponseEntity.notFound().build())
+            }
+
+        //    @PutMapping("/articles/{id}")
+        //    fun updateArticleById(@PathVariable(value = "id") articleId: Long, @RequestBody newArticle: Article): ResponseEntity<Article> {
+        //        return articleRepository.findById(articleId).map { existingArticle ->
+        //            val updatedArticle: Article = existingArticle
+        //                    .apply {title = newArticle.title, content = newArticle.content  }
+        //            ResponseEntity.ok().body(articleRepository.save(updatedArticle))
+        //        }.orElse(ResponseEntity.notFound().build())
+        //
+        //    }
+
+            @DeleteMapping("/articles/{articleId}")
+            fun deleteArticleById(@PathVariable articleId : Long) : ResponseEntity<Void>{
+                return articleRepository.findById(articleId).map { article ->
+                    articleRepository.delete(article)
+                    ResponseEntity<Void>(HttpStatus.OK)
+                }.orElse(ResponseEntity.notFound().build())
+            }
+        }
+
+    The controller defines APIs for all the CRUD operations.
+    I have used Kotlin’s functional style syntax in all the methods to make them short and concise.
+
+------------------------------------------------------------------------------------------------
+
+create database connection on MySQL
+    open terminal type below to create & run MySQL container
+
+    C:\Users\donat>docker run -d -e MYSQL_ROOT_PASSWORD=PASSWORD -p:3306:3306 mysql:8.0.18
+    76f7eb519d6f59e764a9277a267dffce179c6b5c921a1f74a8e847904ac3f03d
+
+    create the article database that we are going to set & use
+
+    C:\Users\donat>docker exec -it 76f bash
+    root@76f7eb519d6f:/# mysql -u root -p
+    Enter password:
+    Welcome to the MySQL monitor.  Commands end with ; or \g.
+    Your MySQL connection id is 53
+    Server version: 8.0.18 MySQL Community Server - GPL
+
+    Copyright (c) 2000, 2019, Oracle and/or its affiliates. All rights reserved.
+
+    Oracle is a registered trademark of Oracle Corporation and/or its
+    affiliates. Other names may be trademarks of their respective
+    owners.
+
+    Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+    mysql> show databases;
+    +--------------------+
+    | Database           |
+    +--------------------+
+    | information_schema |
+    | mysql              |
+    | performance_schema |
+    | sys                |
+    +--------------------+
+    4 rows in set (0.00 sec)
+
+    mysql> create database article;
+    Query OK, 1 row affected (0.01 sec)
+
+    mysql> show databses;
+    ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'databses' at line 1
+    mysql> show databases;
+    +--------------------+
+    | Database           |
+    +--------------------+
+    | article            |
+    | information_schema |
+    | mysql              |
+    | performance_schema |
+    | sys                |
+    +--------------------+
+    5 rows in set (0.00 sec)
+
+    mysql>
+
+    open DB Browser on left side of Intellij
+
+    -> click +
+    -> select MySQL
+    -> Enter the credentials below:
+    Name            : article
+    Description     :
+    Host            : localhost
+    Database        : mysql
+    User            : root
+    Password        : PASSWORD
+    Driver source   : Built-in Library
+
+    click Test Connection : check if already connected successfully
+
+------------------------------------------------------------------------------------------------
+
+error encountered:
+    java.sql.SQLSyntaxErrorException: Unknown database 'article'
+
+    solution:
+
+    should create the article database first on cmd
+
+------------------------------------------------------------------------------------------------
+
+error encountered:
+    upon connecting to DB using DB Browser on Intellij,
+
+    Cannot connect to 'article'
+    Communication link failure
+
+    The last packet sent successfully to the server was 0 milliseconds age.The driver has not received any packets from the server
+
+    solution:
+
+    make sure to specify the port on docker run
+
+    docker run -d -e MYSQL_ROOT_PASSWORD=PASSWORD -p:3306:3306 mysql:8.0.18
+
+------------------------------------------------------------------------------------------------
+
+error encountered:
+    upon delete article on Postman
+
+    {
+        "timestamp": "2020-07-21T08:58:16.118+00:00",
+        "status": 500,
+        "error": "Internal Server Error",
+        "message": "",
+        "path": "/api/articles/1"
+    }
+
+    and output on Run console of Intellij
+
+    2020-07-21 16:58:16.111  WARN 12316 --- [nio-8080-exec-3] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.web.bind.MissingPathVariableException: Missing URI template variable 'articleId' for method parameter of type long]
+
+    solution :
+
+    check the @DeleteMapping("/articles/{id}") on the controller side for that method
+
+    change from {id} to {articleId} to match the @PathVariable articleId : Long
+
+------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+error encountered :
+
